@@ -19,7 +19,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '6.0.x'
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -39,13 +39,22 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+    permissions:
+      id-token: write #This is required for requesting the JWT
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
       
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2BB1C6B1D1DC4C119D90B5E7F4F6EE01 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D69289B2C7824967AE2673A68BFF81F3 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4E0631108DF844CB8C07D139ADFF6C84 }}
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -53,4 +62,4 @@ jobs:
           app-name: 'starwebapp2'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F55535FB63A34E3CBF9F822DD497C186 }}
+          
